@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -31,7 +31,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
-
+#root {
+  display: flex;
+  place-items: center;
+  width: 100vw;
+}
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -44,9 +48,10 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  background-color: white;
+  color: black;
 }
 button:hover {
   border-color: #646cff;

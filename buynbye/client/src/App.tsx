@@ -1,11 +1,10 @@
-import { ProductList } from "./pages/products/_containers/ProductList"
+import { RouterProvider } from 'react-router';
+import { router } from './router';
 
-function App() {
+export default function App() {
   return (
-    <div className="max-w-xl mx-auto">
-      <ProductList />
+    <div className="max-w-xl mx-auto ">
+      <RouterProvider router={router} />
     </div>
-  )
+  );
 }
-
-export default App
