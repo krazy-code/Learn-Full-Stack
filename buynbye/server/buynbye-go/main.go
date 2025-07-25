@@ -22,6 +22,6 @@ func main() {
 
 	r.GET("/products", products.GetAll)
 	r.GET("/products/:id", products.GetByID)
-
+	r.POST("/products", products.CreateProduct)
 	r.Run(":3000")
 }

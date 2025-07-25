@@ -1,4 +1,5 @@
 import React, { useState, type SetStateAction } from 'react';
+import axiosInstance from '../../../lib/services';
 import type { Product } from '../product.type';
 
 interface ProductFormProps {
@@ -13,19 +14,33 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
     category: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const newEntry = {
+  //     id: products.length + 1, // manual ID
+  //     ...newProduct,
+  //     price: parseInt(newProduct.price),
+  //   };
+  //   setProducts([...products, newEntry]); // products = state dari list
+  //   setNewProduct({ name: '', price: '', category: '' });
+  // };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newEntry = {
-      id: products.length + 1, // manual ID
-      ...newProduct,
-      price: parseInt(newProduct.price),
-    };
-    setProducts([...products, newEntry]); // products = state dari list
-    setNewProduct({ name: '', price: '', category: '' });
+    try {
+      const response = await axiosInstance.post('/products', {
+        ...newProduct,
+        price: Number(newProduct.price),
+      });
+      setProducts([...products, response.data]);
+      setNewProduct({ name: '', price: '', category: '' });
+    } catch (err) {
+      console.error('Failed to add product', err);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleAddProduct}>
       <div className="flex flex-col gap-4">
         <h2 className="font-medium text-lg">New Product</h2>
         <input

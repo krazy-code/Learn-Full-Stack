@@ -2,7 +2,7 @@ import axios from 'axios';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import useDebouncedState from '../../../hooks/useDebouncedState';
+import useDebouncedState from '../../../lib/hooks/useDebouncedState';
 import type { Product } from '../product.type';
 import ProductForm from './ProductForm';
 

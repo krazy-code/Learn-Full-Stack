@@ -40,3 +40,13 @@ func GetByID(c *gin.Context) {
 
 	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
 }
+
+func CreateProduct(c *gin.Context) {
+	var product Product
+	if err := c.BindJSON(&product); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+	ProductList = append(ProductList, product)
+	c.JSON(http.StatusOK, product)
+}
