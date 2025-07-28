@@ -44,9 +44,9 @@ func GetByID(c *gin.Context) {
 func CreateProduct(c *gin.Context) {
 	var product Product
 	if err := c.BindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	ProductList = append(ProductList, product)
-	c.JSON(http.StatusOK, product)
+	c.JSON(http.StatusCreated, product)
 }

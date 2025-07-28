@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { useState, type SetStateAction } from 'react';
 import axiosInstance from '../../../lib/services';
 import type { Product } from '../product.type';
@@ -8,22 +9,24 @@ interface ProductFormProps {
 }
 
 function ProductForm({ products, setProducts }: ProductFormProps) {
+  const [messageRes, setMessageRes] = useState<{
+    message: string | null;
+    type: 'error' | 'success';
+  }>({ message: null, type: 'success' });
+
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
     category: '',
   });
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const newEntry = {
-  //     id: products.length + 1, // manual ID
-  //     ...newProduct,
-  //     price: parseInt(newProduct.price),
-  //   };
-  //   setProducts([...products, newEntry]); // products = state dari list
-  //   setNewProduct({ name: '', price: '', category: '' });
-  // };
+  const handleResponse = (
+    message: string | null,
+    type: 'success' | 'error'
+  ) => {
+    setMessageRes({ message, type });
+    setTimeout(() => setMessageRes({ message: null, type: 'success' }), 2000);
+  };
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +37,28 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
       });
       setProducts([...products, response.data]);
       setNewProduct({ name: '', price: '', category: '' });
-    } catch (err) {
+      handleResponse('Success Add Product', 'success');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       console.error('Failed to add product', err);
+      console.log(err);
+      handleResponse(err?.response?.data?.error || '', 'error');
     }
   };
 
   return (
     <form onSubmit={handleAddProduct}>
       <div className="flex flex-col gap-4">
+        {!!messageRes?.message && (
+          <div
+            className={clsx('p-4 rounded-xl text-white font-bold', {
+              'bg-red-400': messageRes.type === 'error',
+              'bg-green-400': messageRes.type === 'success',
+            })}
+          >
+            <span>{messageRes.message}</span>
+          </div>
+        )}
         <h2 className="font-medium text-lg">New Product</h2>
         <input
           type="text"
