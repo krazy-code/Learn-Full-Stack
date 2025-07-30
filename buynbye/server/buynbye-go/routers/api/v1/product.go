@@ -66,3 +66,50 @@ func CreateProduct(c *gin.Context) {
 	data.ProductList = append(data.ProductList, product)
 	c.JSON(http.StatusCreated, product)
 }
+
+func UpdateProduct(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+	var product models.Product
+
+	if err := c.BindJSON(&product); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if errs := utils.ValidateStruct(product); errs != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errors": errs})
+		return
+	}
+	for i, p := range data.ProductList {
+		if p.ID == id {
+			product.ID = id
+			data.ProductList[i] = product
+			c.JSON(http.StatusOK, product)
+			return
+		}
+	}
+
+	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+
+}
+
+func DeleteProduct(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+	for i, p := range data.ProductList {
+		if p.ID == id {
+			data.ProductList = append(data.ProductList[:i], data.ProductList[i+1:]...)
+			c.JSON(http.StatusNoContent, gin.H{"message": "Success Delete", "deleted": p})
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+}

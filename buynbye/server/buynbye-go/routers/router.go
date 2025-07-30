@@ -21,11 +21,12 @@ func InitRouter() *gin.Engine {
 		MaxAge:           12 * time.Hour,
 	}))
 	apiV1 := r.Group("/api/v1")
-	apiV1.Use()
 	{
 		apiV1.GET("/products", v1.GetAll)
 		apiV1.GET("/products/:id", v1.GetByID)
 		apiV1.POST("/products", v1.CreateProduct)
+		apiV1.PUT("/products/:id", v1.UpdateProduct)
+		apiV1.DELETE("/products/:id", v1.DeleteProduct)
 	}
 	return r
 }

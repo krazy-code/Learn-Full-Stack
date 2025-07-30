@@ -1,13 +1,19 @@
 import clsx from 'clsx';
-import React, { useState, type SetStateAction } from 'react';
+import React, { useEffect, useState, type SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
+import Dialog from '../../../components/Dialog';
 import LoadingFull from '../../../components/LoadingFull';
 import axiosInstance from '../../../lib/services';
 import type { Product } from '../product.type';
 
 interface ProductFormProps {
-  products: Product[];
+  opened: boolean;
+  onClose(): void;
   setProducts: React.Dispatch<SetStateAction<Product[]>>;
+  selectedProduct: {
+    value: null | Product;
+    type: 'add' | 'edit' | 'delete' | '';
+  };
 }
 
 type ProductFormBody = {
@@ -16,7 +22,14 @@ type ProductFormBody = {
   category: string;
 };
 
-function ProductForm({ products, setProducts }: ProductFormProps) {
+function ProductForm({
+  setProducts,
+  selectedProduct,
+  onClose,
+  opened,
+}: ProductFormProps) {
+  const isEdit = selectedProduct?.type === 'edit';
+  const productId = selectedProduct?.value?.id;
   const [isLoading, setIsLoading] = useState(false);
 
   const [messageRes, setMessageRes] = useState<{
@@ -28,6 +41,7 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormBody>({
     values: {
@@ -37,38 +51,90 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
     },
   });
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   const handleResponse = (
     message: string | null,
     type: 'success' | 'error'
   ) => {
     setMessageRes({ message, type });
     setTimeout(() => setMessageRes({ message: null, type: 'success' }), 2000);
+    setIsLoading(false);
+    if (type === 'success') handleClose();
   };
 
-  const onSubmit = async (data: ProductFormBody) => {
-    setIsLoading(true);
+  const handleAdd = async (data: ProductFormBody) => {
     try {
       const response = await axiosInstance.post('/products', {
         ...data,
         price: Number(data.price),
       });
-      setProducts([...products, response.data]);
-      reset();
+      setProducts((products) => [...products, response.data]);
       handleResponse('Success Add Product', 'success');
-      setIsLoading(false);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error('Failed to add product', err);
       handleResponse(err?.response?.data?.error || '', 'error');
-      setIsLoading(false);
     }
   };
+
+  const handleEdit = async (data: ProductFormBody) => {
+    try {
+      const response = await axiosInstance.put(`/products/${productId}`, {
+        ...data,
+        price: Number(data.price),
+      });
+      setProducts((products) => [...products, response.data]);
+      handleResponse('Success Edit Product', 'success');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      handleResponse(err?.response?.data?.error || '', 'error');
+    }
+  };
+
+  const onSubmit = (data: ProductFormBody) => {
+    setIsLoading(true);
+    if (isEdit) handleEdit(data);
+    else handleAdd(data);
+  };
+
+  useEffect(() => {
+    if (isEdit && opened) {
+      setValue('name', selectedProduct.value?.name || '');
+      setValue('price', selectedProduct.value?.price || 0);
+      setValue('category', selectedProduct.value?.category || '');
+    }
+  }, [
+    isEdit,
+    opened,
+    selectedProduct.value?.name,
+    selectedProduct.value?.category,
+    selectedProduct.value?.price,
+    setValue,
+  ]);
 
   return (
     <>
       <LoadingFull show={isLoading} />
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex flex-col gap-4">
+
+      <Dialog
+        title={`${isEdit ? 'Edit' : 'Add'} Product`}
+        onClose={handleClose}
+        opened={opened}
+        footer={
+          <>
+            <button type="button" onClick={handleClose}>
+              Cancel
+            </button>
+            <button type="submit" onClick={handleSubmit(onSubmit)}>
+              Submit
+            </button>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-2 ">
           {!!messageRes?.message && (
             <div
               className={clsx('p-4 rounded-xl text-white font-bold', {
@@ -79,7 +145,7 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
               <span>{messageRes.message}</span>
             </div>
           )}
-          <h2 className="font-medium text-lg">New Product</h2>
+
           <input
             type="text"
             placeholder="Name"
@@ -116,9 +182,8 @@ function ProductForm({ products, setProducts }: ProductFormProps) {
           {errors.category && (
             <TextError message={errors.category.message || ''} />
           )}
-          <button type="submit">Add Product</button>
         </div>
-      </form>
+      </Dialog>
     </>
   );
 }

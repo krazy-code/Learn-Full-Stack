@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import axiosInstance from '../../lib/services';
 import type { Product } from './product.type';
 
 function ProductDetail() {
@@ -10,8 +10,8 @@ function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:3000/products/${id}`)
+    axiosInstance
+      .get(`/products/${id}`)
       .then((res) => setProduct(res.data))
       .catch((err) => console.error(err));
   }, [id]);
