@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/krazy-code/buynbye-go/data"
 	"github.com/krazy-code/buynbye-go/models"
-	"github.com/krazy-code/buynbye-go/utils"
+	u "github.com/krazy-code/buynbye-go/utils"
 )
 
 func GetAll(c *gin.Context) {
@@ -20,39 +20,42 @@ func GetAll(c *gin.Context) {
 				filtered = append(filtered, p)
 			}
 		}
-		c.JSON(http.StatusOK, filtered)
+		u.SendResponse(c, http.StatusOK, filtered, nil)
 		return
 	}
-	c.JSON(http.StatusOK, data.ProductList)
+	u.SendResponse(c, http.StatusOK, data.ProductList, nil)
+
 }
 
 func GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		u.SendResponse(c, http.StatusBadRequest, nil, gin.H{"message": "Invalid ID"})
 		return
 	}
 
 	for _, p := range data.ProductList {
 		if p.ID == id {
-			c.JSON(http.StatusOK, p)
+			u.SendResponse(c, http.StatusOK, p, nil)
 			return
 		}
 	}
 
-	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+	u.SendResponse(c, http.StatusNotFound, nil, gin.H{"message": "Product not found"})
+
 }
 
 func CreateProduct(c *gin.Context) {
 	var product models.Product
 
 	if err := c.BindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		u.SendResponse(c, http.StatusBadRequest, nil, gin.H{"error": err})
+
 		return
 	}
-	if errs := utils.ValidateStruct(product); errs != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": errs})
+	if errs := u.Validate.Struct(product); errs != nil {
+		c.Error(errs)
 		return
 	}
 	maxID := 0
@@ -64,36 +67,31 @@ func CreateProduct(c *gin.Context) {
 	product.ID = maxID + 1
 
 	data.ProductList = append(data.ProductList, product)
-	c.JSON(http.StatusCreated, product)
+	u.SendResponse(c, http.StatusCreated, product, nil)
 }
 
 func UpdateProduct(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		u.SendResponse(c, http.StatusBadRequest, nil, gin.H{"message": "Invalid ID"})
 		return
 	}
 	var product models.Product
 
-	if err := c.BindJSON(&product); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if errs := utils.ValidateStruct(product); errs != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errors": errs})
+	if err := c.ShouldBindJSON(&product); err != nil {
+		c.Error(err)
 		return
 	}
 	for i, p := range data.ProductList {
 		if p.ID == id {
 			product.ID = id
 			data.ProductList[i] = product
-			c.JSON(http.StatusOK, product)
+			u.SendResponse(c, http.StatusOK, product, nil)
 			return
 		}
 	}
-
-	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+	u.SendResponse(c, http.StatusNotFound, nil, gin.H{"message": "Product not found"})
 
 }
 
@@ -101,15 +99,16 @@ func DeleteProduct(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		u.SendResponse(c, http.StatusBadRequest, nil, gin.H{"message": "Invalid ID"})
 		return
 	}
 	for i, p := range data.ProductList {
 		if p.ID == id {
 			data.ProductList = append(data.ProductList[:i], data.ProductList[i+1:]...)
-			c.JSON(http.StatusNoContent, gin.H{"message": "Success Delete", "deleted": p})
+			u.SendResponse(c, http.StatusNoContent, nil, nil)
 			return
 		}
 	}
-	c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+	u.SendResponse(c, http.StatusNotFound, nil, gin.H{"message": "Product not found"})
+
 }
