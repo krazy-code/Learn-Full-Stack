@@ -6,7 +6,8 @@ export default function useDebounceState<T>(
 ): [T, React.Dispatch<SetStateAction<T>>] {
   const [debouncedValue, setDebouncedValue] = useState(value);
   const [termValue, setTermValue] = useState(value);
-  const timeoutRef = useRef<null | NodeJS.Timeout>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const timeoutRef = useRef<null | any>(null);
 
   useEffect(() => {
     // Clear previous timeout if it exists
