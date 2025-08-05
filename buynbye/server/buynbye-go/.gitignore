@@ -39,3 +39,4 @@ go.sum
 
 # Windows specific files
 Thumbs.db
+.vercel

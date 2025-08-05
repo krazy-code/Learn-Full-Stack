@@ -1,11 +1,21 @@
-package main
+package handler
 
 import (
+	"net/http"
+
 	"github.com/krazy-code/buynbye-go/routers"
 )
 
-func main() {
+// var Handler http.Handler = routers.InitRouter()
+
+// func main() {
+// 	r := routers.InitRouter()
+
+// 	r.Run(":3000")
+// }
+
+func Handler(w http.ResponseWriter, res *http.Request) {
 	r := routers.InitRouter()
 
-	r.Run(":3000")
+	r.ServeHTTP(w, res)
 }
