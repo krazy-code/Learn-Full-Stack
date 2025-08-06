@@ -12,7 +12,7 @@ function ProductDetail() {
   useEffect(() => {
     axiosInstance
       .get(`/products/${id}`)
-      .then((res) => setProduct(res.data))
+      .then((res) => setProduct(res.data.data))
       .catch((err) => console.error(err));
   }, [id]);
   if (!product) return <span>Not Found</span>;

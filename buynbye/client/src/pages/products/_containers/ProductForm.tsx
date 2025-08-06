@@ -72,7 +72,7 @@ function ProductForm({
         ...data,
         price: Number(data.price),
       });
-      setProducts((products) => [...products, response.data]);
+      setProducts((products) => [...products, response.data.data]);
       handleResponse('Success Add Product', 'success');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -86,7 +86,7 @@ function ProductForm({
         ...data,
         price: Number(data.price),
       });
-      setProducts((products) => [...products, response.data]);
+      setProducts((products) => [...products, response.data.data]);
       handleResponse('Success Edit Product', 'success');
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

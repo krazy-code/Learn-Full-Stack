@@ -52,7 +52,7 @@ export const ProductList = () => {
       })
       .then((res) => {
         setIsLoading(false);
-        setProducts(res.data);
+        setProducts(res.data.data);
       })
       .catch((err) => {
         console.error(err);
